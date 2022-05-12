@@ -1,36 +1,25 @@
-# Authors: Jakub Mazurkiewicz, Michał Brus
+# Author: Jakub Mazurkiewicz
 from itertools import islice
+import sys
+
 import matplotlib.pyplot as plt
 from sklearn.datasets import load_digits
 from sklearn.model_selection import train_test_split
-import sys
 
-class MnistSetDeserializer:
-    pass
+from mnist_base import MnistSetBase
 
-class MnistSet:
+class MnistSet8(MnistSetBase):
     """
-    The MNIST set: https://en.wikipedia.org/wiki/MNIST_database
+    The MNIST set from `sklearn`.
     """
     def __init__(self):
+        super().__init__()
         self.digits = load_digits()
-        self.training_set = []
-        self.validating_set = []
-        self.testing_set = []
         self._split_sets()
 
     def _split_sets(self):
         self.training_set, self.testing_set = train_test_split(self.digits.data)
         self.training_set, self.validating_set = train_test_split(self.training_set)
-
-    def get_training_set(self):
-        return self.training_set
-
-    def get_validating_set(self):
-        return self.validating_set
-
-    def get_testing_set(self):
-        return self.training_set
 
     def images(self):
         for img in self.digits.images:
@@ -40,15 +29,10 @@ class MnistSet:
         for img in self.digits.data:
             yield img
 
-    def print_info(self):
-        print(f'Training set size:   {len(self.training_set)}')
-        print(f'Validating set size: {len(self.validating_set)}')
-        print(f'Testing set size:    {len(self.testing_set)}')
-
 def main():
     img_count = int(sys.argv[1]) if len(sys.argv) >= 2 else 10
-    mnist = MnistSet()
-    mnist.print_set_info()
+    mnist = MnistSet8()
+    print(mnist)
 
     plt.gray()
     for img in islice(mnist.images(), img_count):
