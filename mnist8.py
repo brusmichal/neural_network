@@ -2,7 +2,6 @@
 from itertools import islice
 import sys
 
-import matplotlib.pyplot as plt
 from sklearn.datasets import load_digits
 from sklearn.model_selection import train_test_split
 
@@ -29,15 +28,18 @@ class MnistSet8(MnistSetBase):
         for img in self.digits.data:
             yield img
 
+    def print_test_image(self, index: int):
+        image = self.testing_set[index]
+        for i in range(8):
+            for j in range(8):
+                print(f'{int(image[8 * i + j]):>4}', end='')
+            print('')
+
 def main():
-    img_count = int(sys.argv[1]) if len(sys.argv) >= 2 else 10
+    image_index = int(sys.argv[1]) if len(sys.argv) >= 2 else 10
     mnist = MnistSet8()
     print(mnist)
-
-    plt.gray()
-    for img in islice(mnist.images(), img_count):
-        plt.matshow(img)
-    plt.show()
+    mnist.print_test_image(image_index)
 
 if __name__ == '__main__':
     main()
