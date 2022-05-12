@@ -1,23 +1,7 @@
-# Python files
 __pycache__/
 *.py[cod]
 *$py.class
 .ipynb_checkpoints
-
-# Secrets
-__test*.py
-__*.sh
-
-# Other binary files
-*.zip
-*.pdf
-*.png
-~$*
-
-# Documentation
-*.md
-*.html
-!README.md
+*.exe
+*.out
 *.log
-img/
-*.xlsx
