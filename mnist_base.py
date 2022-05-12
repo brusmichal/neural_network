@@ -1,7 +1,12 @@
 # Author: Jakub Mazurkiewicz
 from typing import List
+
 class MnistSetBase:
-    def __init__(self):
+    """
+    The base for 28x28 and 8x8 MNIST sets.
+    """
+    def __init__(self, size: int):
+        self.size = size
         self.training_set = []
         self.validating_set = []
         self.testing_set = []
@@ -23,4 +28,8 @@ class MnistSetBase:
         ])
 
     def print_test_image(self, index: int):
-        raise NotImplemented('Method `print_test_image` shall be implemented by derived class')
+        image = self.testing_set[index]
+        for i in range(self.size):
+            for j in range(self.size):
+                print(f'{int(image[self.size * i + j]):>4}', end='')
+            print('')
