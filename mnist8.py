@@ -11,11 +11,7 @@ class MnistSet8(MnistSetBase):
     The MNIST set from `sklearn`.
     """
     def __init__(self):
-        self.digits = load_digits()
-        self._split_sets()
-
-    def _split_sets(self):
-        self.training_set, self.testing_set = train_test_split(self.digits.data)
+        self.training_set, self.testing_set = train_test_split(load_digits().data)
         self.training_set, self.validating_set = train_test_split(self.training_set)
 
     def print_test_image(self, index: int):
