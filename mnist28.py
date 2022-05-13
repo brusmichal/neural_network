@@ -11,7 +11,6 @@ class MnistSet28(MnistSetBase):
     Original MNIST set.
     """
     def __init__(self, training_filename: str, testing_filename: str):
-        super().__init__(28)
         self.training_set = self._read_set(training_filename)
         self.training_set, self.validating_set = train_test_split(self.training_set)
         self.testing_set = self._read_set(testing_filename)
@@ -28,7 +27,19 @@ class MnistSet28(MnistSetBase):
         dims = [int.from_bytes(file.read(4), byteorder='big') for _ in range(3)]
         return dims[0], dims[1] * dims[2]
 
+    def print_test_image(self, index: int):
+        image = self.testing_set[index]
+        for i in range(28):
+            for j in range(28):
+                color = image[28 * i + j]
+                print(f'\x1b[38;2;{color};{color};{color}m\u2588', end='')
+            print('')
+        print('\x1b[0m', end='')
+
 def main():
+    """
+    Usage: `python mnist28.py [image-index]`
+    """
     mnist = MnistSet28('train-images.idx3-ubyte', 't10k-images.idx3-ubyte')
     print(mnist)
     mnist.print_test_image(int(sys.argv[1]) if len(sys.argv) >= 2 else 0)
