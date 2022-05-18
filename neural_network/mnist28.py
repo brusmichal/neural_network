@@ -24,7 +24,7 @@ class MnistSet28(MnistSetBase):
 
     def _read_set(self, source: Mnist28Source) -> List[List[int]]:
         return [
-            (pixels, label) for pixels, label
+            (self._adjust_pixels(pixels), label) for pixels, label
             in zip(self._read_pixels(source.data_filename), self._read_labels(source.label_filename))
         ]
 
@@ -35,6 +35,9 @@ class MnistSet28(MnistSetBase):
             assert int.from_bytes(file.read(1), byteorder='big') == 1
             label_count = int.from_bytes(file.read(4), byteorder='big')
             return [int.from_bytes(file.read(1), byteorder='big') for _ in range(label_count)]
+
+    def _adjust_pixels(self, pixels):
+        return [int(pixel) for pixel in pixels]
 
     def _read_pixels(self, filename: str) -> List[List[int]]:
         with open(filename, 'rb') as file:
