@@ -4,24 +4,26 @@ import sys
 from sklearn.datasets import load_digits
 from sklearn.model_selection import train_test_split
 
-from mnist_base import MnistSetBase
+from mnist_base import MnistImage, MnistSetBase
 
 class MnistSet8(MnistSetBase):
     """
     The MNIST set from `sklearn`.
     """
     def __init__(self):
-        self.training_set, self.testing_set = train_test_split(load_digits().data)
+        digits = load_digits()
+        images = [MnistImage(pixels, label) for pixels, label in zip(digits.data, digits.target)]
+        self.training_set, self.testing_set = train_test_split(images)
         self.training_set, self.validating_set = train_test_split(self.training_set)
 
     def print_test_image(self, index: int):
         image = self.testing_set[index]
         for i in range(8):
             for j in range(8):
-                color = max(0, min(int(16 * image[8 * i + j]), 255))
+                color = max(0, min(int(16 * image.pixels[8 * i + j]), 255))
                 print(f'\x1b[38;2;{color};{color};{color}m\u2588', end='')
             print('')
-        print('\x1b[0m', end='')
+        print(f'\x1b[0mLABEL: {image.get_label()}')
 
 def main():
     """
