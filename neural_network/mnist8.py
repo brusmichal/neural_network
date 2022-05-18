@@ -4,7 +4,7 @@ import sys
 from sklearn.datasets import load_digits
 from sklearn.model_selection import train_test_split
 
-from mnist_base import MnistImage, MnistSetBase
+from mnist_base import MnistSetBase
 
 
 class MnistSet8(MnistSetBase):
@@ -13,20 +13,14 @@ class MnistSet8(MnistSetBase):
     """
 
     def __init__(self):
+        super().__init__(8)
         digits = load_digits()
-        images = [MnistImage(label, pixels) for label, pixels in zip(digits.target, digits.data)]
-
+        images = [(self._adjust_pixels(pixels), label) for pixels, label in zip(digits.data, digits.target)]
         self.training_set, self.testing_set = train_test_split(images)
         self.training_set, self.validating_set = train_test_split(self.training_set)
 
-    def print_test_image(self, index: int):
-        image = self.testing_set[index]
-        for i in range(8):
-            for j in range(8):
-                color = min(int(16 * image.pixels[8 * i + j]), 255)
-                print(f'\x1b[38;2;{color};{color};{color}m\u2588', end='')
-            print('')
-        print(f'\x1b[0mLABEL: {image.get_label()}')
+    def _adjust_pixels(self, pixels):
+        return [min(int(16 * pixel), 255) for pixel in pixels]
 
 
 if __name__ == '__main__':
