@@ -1,7 +1,6 @@
 # Author: Jakub Mazurkiewicz
 from dataclasses import dataclass
 import sys
-from numpy import byte
 
 from sklearn.model_selection import train_test_split
 from typing import List, Tuple
@@ -57,15 +56,14 @@ class MnistSet28(MnistSetBase):
             print('')
         print(f'\x1b[0mLABEL: {image.get_label()}')
 
-def main():
+DEFAULT_TRAINING_FILES = Mnist28Source('train-labels.idx1-ubyte', 'train-images.idx3-ubyte')
+DEFAULT_TESTING_FILES = Mnist28Source('t10k-labels.idx1-ubyte', 't10k-images.idx3-ubyte')
+DEFAULT_MNIST28 = MnistSet28(DEFAULT_TRAINING_FILES, DEFAULT_TESTING_FILES)
+
+if __name__ == '__main__':
     """
     Usage: `python mnist28.py [image-index]`
     """
-    training_files = Mnist28Source('train-labels.idx1-ubyte', 'train-images.idx3-ubyte')
-    testing_files = Mnist28Source('t10k-labels.idx1-ubyte', 't10k-images.idx3-ubyte')
-    mnist = MnistSet28(training_files, testing_files)
+    mnist = DEFAULT_MNIST28
     print(mnist)
     mnist.print_test_image(int(sys.argv[1]) if len(sys.argv) >= 2 else 0)
-
-if __name__ == '__main__':
-    main()
