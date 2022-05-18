@@ -6,10 +6,12 @@ from sklearn.model_selection import train_test_split
 
 from mnist_base import MnistImage, MnistSetBase
 
+
 class MnistSet8(MnistSetBase):
     """
     The MNIST set from `sklearn`.
     """
+
     def __init__(self):
         digits = load_digits()
         images = [MnistImage(label, pixels) for label, pixels in zip(digits.target, digits.data)]
@@ -25,6 +27,7 @@ class MnistSet8(MnistSetBase):
                 print(f'\x1b[38;2;{color};{color};{color}m\u2588', end='')
             print('')
         print(f'\x1b[0mLABEL: {image.get_label()}')
+
 
 if __name__ == '__main__':
     """
