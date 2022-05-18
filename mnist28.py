@@ -38,10 +38,10 @@ class MnistSet28(MnistSetBase):
 
     def _read_pixels(self, filename: str) -> List[List[int]]:
         with open(filename, 'rb') as file:
-            image_count, image_size = self._read_header(file)
+            image_count, image_size = self._read_pixels_header(file)
             return [file.read(image_size) for _ in range(image_count)]
 
-    def _read_header(self, file) -> Tuple[int, int]:
+    def _read_pixels_header(self, file) -> Tuple[int, int]:
         assert int.from_bytes(file.read(2), byteorder='big') == 0
         assert int.from_bytes(file.read(1), byteorder='big') == 0x08
         assert int.from_bytes(file.read(1), byteorder='big') == 3
