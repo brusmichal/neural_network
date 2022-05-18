@@ -5,7 +5,7 @@ import sys
 from sklearn.model_selection import train_test_split
 from typing import List, Tuple
 
-from mnist_base import MnistImage, MnistSetBase
+from mnist_base import MnistSetBase
 
 @dataclass
 class Mnist28Source:
@@ -17,14 +17,15 @@ class MnistSet28(MnistSetBase):
     Original MNIST set.
     """
     def __init__(self, training_filename: str, testing_filename: str):
+        super().__init__(28)
         self.training_set = self._read_set(training_filename)
         self.training_set, self.validating_set = train_test_split(self.training_set)
         self.testing_set = self._read_set(testing_filename)
 
     def _read_set(self, source: Mnist28Source) -> List[List[int]]:
         return [
-            MnistImage(label, pixels) for label, pixels
-            in zip(self._read_labels(source.label_filename), self._read_pixels(source.data_filename))
+            (pixels, label) for pixels, label
+            in zip(self._read_pixels(source.data_filename), self._read_labels(source.label_filename))
         ]
 
     def _read_labels(self, filename: str) -> List[int]:
@@ -46,15 +47,6 @@ class MnistSet28(MnistSetBase):
         assert int.from_bytes(file.read(1), byteorder='big') == 3
         dims = [int.from_bytes(file.read(4), byteorder='big') for _ in range(3)]
         return dims[0], dims[1] * dims[2]
-
-    def print_test_image(self, index: int):
-        image = self.testing_set[index]
-        for i in range(28):
-            for j in range(28):
-                color = image.pixels[28 * i + j]
-                print(f'\x1b[38;2;{color};{color};{color}m\u2588', end='')
-            print('')
-        print(f'\x1b[0mLABEL: {image.get_label()}')
 
 DEFAULT_TRAINING_FILES = Mnist28Source('train-labels.idx1-ubyte', 'train-images.idx3-ubyte')
 DEFAULT_TESTING_FILES = Mnist28Source('t10k-labels.idx1-ubyte', 't10k-images.idx3-ubyte')
