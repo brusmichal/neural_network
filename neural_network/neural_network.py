@@ -7,9 +7,9 @@ class Network(object):
         self.number_of_layers = len(neurons_per_layer)
         self.neurons_per_layer = neurons_per_layer
         rng = default_rng()
-        self.biases = {[rng.uniform(-1 / np.sqrt(neurons_per_layer[0]), 1 / np.sqrt(neurons_per_layer[0]), size=(y, 1)) \
-                        for y in neurons_per_layer[1:]]}
-        self.weights = [rng.uniform(-1 / np.sqrt(neurons_per_layer[0]), 1 / np.sqrt(neurons_per_layer[0]), size=(x, y)) \
+        self.biases = [rng.uniform(-1 / np.sqrt(neurons_per_layer[0]), 1 / np.sqrt(neurons_per_layer[0]), size=(y, 1)) \
+                       for y in neurons_per_layer[1:]]
+        self.weights = [rng.uniform(-1 / np.sqrt(neurons_per_layer[0]), 1 / np.sqrt(neurons_per_layer[0]), size=(y, x)) \
                         for x, y in zip(neurons_per_layer[:-1], neurons_per_layer[1:])]
 
     def feedforward(self, a):
@@ -17,10 +17,10 @@ class Network(object):
             a = sigmoid(np.dot(w, a) + b)
         return a
 
-    def stochastic_gradient_descent(self, training_data, epochs, mini_batch_size, learning_rate, test_data=None):
+    def train_with_sgd(self, training_data, epochs, mini_batch_size, learning_rate, test_data=None):
         if test_data:
             n_test = len(test_data)
-        n = len(test_data)
+        n = len(training_data)
         for i in range(epochs):
             rng = default_rng()
             rng.shuffle(training_data)
@@ -53,6 +53,7 @@ class Network(object):
         for b, w in zip(self.biases, self.weights):
             z_vector = np.dot(w, activation) + b
             z_vectors.append(z_vector)
+            activation = relu(z_vector)
             activations.append(activation)
 
         delta = (activations[-1] - y) * relu_derivative(z_vectors[-1])
@@ -60,11 +61,11 @@ class Network(object):
         nabla_w[-1] = np.dot(delta, activations[-2].transpose())
 
         for l in range(2, self.number_of_layers):
-            z_vector = z_vectors[-1]
+            z_vector = z_vectors[-l]
             delta = np.dot(self.weights[-l + 1].transpose(), delta) * relu_derivative(z_vector)
-            nabla_b[-1] = delta
-            nabla_w = np.dot(delta, activations[-l - 1].transpose())
-
+            nabla_b[-l] = delta
+            nabla_w[-l] = np.dot(delta, activations[-l - 1].transpose())
+# tu wyżej jest gdzieś błąd, próbowałem użyć np array zamiast [] i nadal nie działa
         return nabla_b, nabla_w
 
     def evaluate(self, test_data):
@@ -81,11 +82,10 @@ def sigmoid_derivative(x):
 
 
 def relu(x):
-    return max(0.0, x)
+    return np.maximum(0.0, x)
 
 
 def relu_derivative(x):
-    if x >= 0:
-        return 1.0
-    else:
-        return 0.0
+    x[x > 0] = 1
+    x[x <= 0] = 0
+    return x
