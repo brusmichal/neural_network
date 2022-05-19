@@ -2,6 +2,14 @@ import numpy as np
 from numpy.random import default_rng
 
 
+def loss(predicted_y, y):
+    return np.square(predicted_y - y)
+
+
+def loss_derivative(predicted_y, y):
+    return 2 * (predicted_y - y)
+
+
 class Network(object):
     def __init__(self, neurons_per_layer):
         self.number_of_layers = len(neurons_per_layer)
@@ -15,6 +23,7 @@ class Network(object):
         self.act_function_der = relu_derivative
 
     def feedforward(self, a):
+        a = np.reshape(a, (-1, 1))
         for b, w in zip(self.biases, self.weights):
             a = self.act_function(np.dot(w, a) + b)
         return a
@@ -30,7 +39,8 @@ class Network(object):
             for mini_batch in mini_batches:
                 self.update_mini_batch(mini_batch, learning_rate)
             if test_data:
-                print(f"Epoch {i} / {epochs}: {self.evaluate(test_data)} / {n_test}")
+                print(f"Epoch: {i} / {epochs} Accuracy: {self.evaluate(test_data)} / {n_test}")
+                #print(f"Epoch: {i} / {epochs} MSE: {self.mean_loss(test_data)} / {n_test}")
             else:
                 print(f"Epoch {i} / {epochs} completed.")
 
@@ -49,16 +59,16 @@ class Network(object):
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
 
-        activation = x
+        activation = np.reshape(x, (-1, 1))
         activations = [np.reshape(x, (-1, 1))]
         z_vectors = []
         for b, w in zip(self.biases, self.weights):
             z = np.dot(w, activation)
-            z_vector = np.reshape(np.dot(w, activation), (-1, 1)) + b
+            z_vector = np.dot(w, activation) + b
             z_vectors.append(z_vector)
             activation = self.act_function(z_vector)
             activations.append(activation)
-        delta = self.loss_derivative(activations[-1], y) * self.act_function_der(z_vectors[-1])
+        delta = loss_derivative(activations[-1], y) * self.act_function_der(z_vectors[-1])
         nabla_b[-1] = delta
         nabla_w[-1] = np.dot(delta, np.transpose(activations[-2]))
 
@@ -70,17 +80,10 @@ class Network(object):
         # tu wyżej jest gdzieś błąd, próbowałem użyć np array zamiast [] i nadal nie działa
         return nabla_b, nabla_w
 
-    def loss_derivative(self, predicted_y, y):
-        return 2 * (predicted_y - y)
-
     def evaluate(self, test_data):
         results = [(np.argmax(self.feedforward(x)), y) for (x, y) in test_data]
         return sum(int(x == y) for (x, y) in results)
 
-    # def MSE(self, predicted_y, y):
-    #     err = np.sqr(predicted_y - y)
-    #     mean_err = np.array()
-    #     return
 
 
 def sigmoid(x):
