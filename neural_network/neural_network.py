@@ -7,7 +7,7 @@ class Network(object):
         self.number_of_layers = len(neurons_per_layer)
         self.neurons_per_layer = neurons_per_layer
         rng = default_rng()
-        self.biases = [rng.uniform(-1 / np.sqrt(neurons_per_layer[0]), 1 / np.sqrt(neurons_per_layer[0]), size=y) \
+        self.biases = [rng.uniform(-1 / np.sqrt(neurons_per_layer[0]), 1 / np.sqrt(neurons_per_layer[0]), size=(y, 1)) \
                        for y in neurons_per_layer[1:]]
         self.weights = [rng.uniform(-1 / np.sqrt(neurons_per_layer[0]), 1 / np.sqrt(neurons_per_layer[0]), size=(y, x)) \
                         for x, y in zip(neurons_per_layer[:-1], neurons_per_layer[1:])]
@@ -50,28 +50,37 @@ class Network(object):
         nabla_w = [np.zeros(w.shape) for w in self.weights]
 
         activation = x
-        activations = [x]
+        activations = [np.reshape(x, (-1, 1))]
         z_vectors = []
         for b, w in zip(self.biases, self.weights):
-            z_vector = np.dot(w, activation) + b
+            z = np.dot(w, activation)
+            z_vector = np.reshape(np.dot(w, activation), (-1, 1)) + b
             z_vectors.append(z_vector)
             activation = self.act_function(z_vector)
             activations.append(activation)
-        delta = (activations[-1] - y) * self.act_function_der(z_vectors[-1])
+        delta = self.loss_derivative(activations[-1], y) * self.act_function_der(z_vectors[-1])
         nabla_b[-1] = delta
-        nabla_w[-1] = np.dot(delta, activations[-2].transpose())
+        nabla_w[-1] = np.dot(delta, np.transpose(activations[-2]))
 
         for i in range(2, self.number_of_layers):
             z_vector = z_vectors[-i]
             delta = np.dot(self.weights[-i + 1].transpose(), delta) * self.act_function_der(z_vector)
             nabla_b[-i] = delta
-            nabla_w[-i] = np.dot(delta, activations[-i - 1].transpose())
+            nabla_w[-i] = np.dot(delta, np.transpose(activations[-i - 1]))
         # tu wyżej jest gdzieś błąd, próbowałem użyć np array zamiast [] i nadal nie działa
         return nabla_b, nabla_w
+
+    def loss_derivative(self, predicted_y, y):
+        return 2 * (predicted_y - y)
 
     def evaluate(self, test_data):
         results = [(np.argmax(self.feedforward(x)), y) for (x, y) in test_data]
         return sum(int(x == y) for (x, y) in results)
+
+    # def MSE(self, predicted_y, y):
+    #     err = np.sqr(predicted_y - y)
+    #     mean_err = np.array()
+    #     return
 
 
 def sigmoid(x):
