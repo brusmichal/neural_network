@@ -7,14 +7,16 @@ class Network(object):
         self.number_of_layers = len(neurons_per_layer)
         self.neurons_per_layer = neurons_per_layer
         rng = default_rng()
-        self.biases = [rng.uniform(-1 / np.sqrt(neurons_per_layer[0]), 1 / np.sqrt(neurons_per_layer[0]), size=(y, 1)) \
+        self.biases = [rng.uniform(-1 / np.sqrt(neurons_per_layer[0]), 1 / np.sqrt(neurons_per_layer[0]), size=y) \
                        for y in neurons_per_layer[1:]]
         self.weights = [rng.uniform(-1 / np.sqrt(neurons_per_layer[0]), 1 / np.sqrt(neurons_per_layer[0]), size=(y, x)) \
                         for x, y in zip(neurons_per_layer[:-1], neurons_per_layer[1:])]
+        self.act_function = relu
+        self.act_function_der = relu_derivative
 
     def feedforward(self, a):
         for b, w in zip(self.biases, self.weights):
-            a = sigmoid(np.dot(w, a) + b)
+            a = self.act_function(np.dot(w, a) + b)
         return a
 
     def train_with_sgd(self, training_data, epochs, mini_batch_size, learning_rate, test_data=None):
@@ -53,19 +55,18 @@ class Network(object):
         for b, w in zip(self.biases, self.weights):
             z_vector = np.dot(w, activation) + b
             z_vectors.append(z_vector)
-            activation = relu(z_vector)
+            activation = self.act_function(z_vector)
             activations.append(activation)
-
-        delta = (activations[-1] - y) * relu_derivative(z_vectors[-1])
+        delta = (activations[-1] - y) * self.act_function_der(z_vectors[-1])
         nabla_b[-1] = delta
         nabla_w[-1] = np.dot(delta, activations[-2].transpose())
 
-        for l in range(2, self.number_of_layers):
-            z_vector = z_vectors[-l]
-            delta = np.dot(self.weights[-l + 1].transpose(), delta) * relu_derivative(z_vector)
-            nabla_b[-l] = delta
-            nabla_w[-l] = np.dot(delta, activations[-l - 1].transpose())
-# tu wyżej jest gdzieś błąd, próbowałem użyć np array zamiast [] i nadal nie działa
+        for i in range(2, self.number_of_layers):
+            z_vector = z_vectors[-i]
+            delta = np.dot(self.weights[-i + 1].transpose(), delta) * self.act_function_der(z_vector)
+            nabla_b[-i] = delta
+            nabla_w[-i] = np.dot(delta, activations[-i - 1].transpose())
+        # tu wyżej jest gdzieś błąd, próbowałem użyć np array zamiast [] i nadal nie działa
         return nabla_b, nabla_w
 
     def evaluate(self, test_data):

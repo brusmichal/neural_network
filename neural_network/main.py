@@ -9,7 +9,7 @@ def main():
     # validation_data = mnist.get_validating_set()
     test_data = mnist.get_testing_set()
 
-    network = Network([64, 15, 15, 10])
+    network = Network([64, 15, 10])
     network.train_with_sgd(training_data, 30, 10, 3.0, test_data=test_data)
 
 
