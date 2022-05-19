@@ -50,7 +50,7 @@ class MnistSetBase:
         image = self.get_testing_images()[index]
         for i in range(self.size):
             for j in range(self.size):
-                color = image[self.size * i + j]
+                color = int(255 * image[self.size * i + j])
                 print(f'\x1b[38;2;{color};{color};{color}m\u2588', end='')
             print('')
         print(f'\x1b[0mLABEL: {self.get_testing_labels()[index]}')

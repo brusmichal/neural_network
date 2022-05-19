@@ -37,7 +37,7 @@ class MnistSet28(MnistSetBase):
             return [int.from_bytes(file.read(1), byteorder='big') for _ in range(label_count)]
 
     def _adjust_pixels(self, pixels):
-        return [int(pixel) for pixel in pixels]
+        return [pixel / 255 for pixel in pixels]
 
     def _read_pixels(self, filename: str) -> List[List[int]]:
         with open(filename, 'rb') as file:

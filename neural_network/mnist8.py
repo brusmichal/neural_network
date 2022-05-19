@@ -20,7 +20,7 @@ class MnistSet8(MnistSetBase):
         self.training_set, self.validating_set = train_test_split(self.training_set)
 
     def _adjust_pixels(self, pixels):
-        return [min(int(16 * pixel), 255) for pixel in pixels]
+        return [pixel / 16 for pixel in pixels]
 
 
 if __name__ == '__main__':
