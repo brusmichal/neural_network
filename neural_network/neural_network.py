@@ -19,8 +19,8 @@ class Network(object):
                        for y in neurons_per_layer[1:]]
         self.weights = [rng.uniform(-1 / np.sqrt(neurons_per_layer[0]), 1 / np.sqrt(neurons_per_layer[0]), size=(y, x)) \
                         for x, y in zip(neurons_per_layer[:-1], neurons_per_layer[1:])]
-        self.act_function = relu
-        self.act_function_der = relu_derivative
+        self.act_function = sigmoid
+        self.act_function_der = sigmoid_derivative
 
     def feedforward(self, a):
         a = np.reshape(a, (-1, 1))
@@ -28,8 +28,9 @@ class Network(object):
             a = self.act_function(np.dot(w, a) + b)
         return a
 
-    def train_with_sgd(self, training_data, epochs, mini_batch_size, learning_rate, test_data=None):
+    def SGD(self, training_data, epochs, mini_batch_size, learning_rate, test_data=None):
         if test_data:
+            test_data = list(test_data)
             n_test = len(test_data)
         n = len(training_data)
         for i in range(epochs):
@@ -40,7 +41,7 @@ class Network(object):
                 self.update_mini_batch(mini_batch, learning_rate)
             if test_data:
                 print(f"Epoch: {i} / {epochs} Accuracy: {self.evaluate(test_data)} / {n_test}")
-                #print(f"Epoch: {i} / {epochs} MSE: {self.mean_loss(test_data)} / {n_test}")
+                # print(f"Epoch: {i} / {epochs} MSE: {self.mean_loss(test_data)} / {n_test}")
             else:
                 print(f"Epoch {i} / {epochs} completed.")
 
@@ -49,21 +50,20 @@ class Network(object):
         nabla_w = [np.zeros(w.shape) for w in self.weights]
 
         for x, y in mini_batch:
-            delta_nabla_b, delta_nabla_w = self.backpropagation(x, y)
+            delta_nabla_b, delta_nabla_w = self.backpropagation(np.reshape(x, (-1, 1)), y)
             nabla_b = [nb + d_nb for nb, d_nb in zip(nabla_b, delta_nabla_b)]
             nabla_w = [nw + d_nw for nw, d_nw in zip(nabla_w, delta_nabla_w)]
-        self.biases = [b - (learning_rate / len(mini_batch)) * nb for b, nb in zip(self.biases, nabla_b)]
-        self.weights = [w - (learning_rate / len(mini_batch)) * nw for w, nw in zip(self.weights, nabla_w)]
+        self.biases = [b - (nb * learning_rate / len(mini_batch)) for b, nb in zip(self.biases, nabla_b)]
+        self.weights = [w - (nw * learning_rate / len(mini_batch)) for w, nw in zip(self.weights, nabla_w)]
 
     def backpropagation(self, x, y):
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
 
-        activation = np.reshape(x, (-1, 1))
-        activations = [np.reshape(x, (-1, 1))]
+        activation = x
+        activations = [x]
         z_vectors = []
         for b, w in zip(self.biases, self.weights):
-            z = np.dot(w, activation)
             z_vector = np.dot(w, activation) + b
             z_vectors.append(z_vector)
             activation = self.act_function(z_vector)
@@ -77,13 +77,12 @@ class Network(object):
             delta = np.dot(self.weights[-i + 1].transpose(), delta) * self.act_function_der(z_vector)
             nabla_b[-i] = delta
             nabla_w[-i] = np.dot(delta, np.transpose(activations[-i - 1]))
-        # tu wyżej jest gdzieś błąd, próbowałem użyć np array zamiast [] i nadal nie działa
         return nabla_b, nabla_w
 
     def evaluate(self, test_data):
-        results = [(np.argmax(self.feedforward(x)), y) for (x, y) in test_data]
+        results = [(np.argmax(self.feedforward(x)), y)
+                   for (x, y) in test_data]
         return sum(int(x == y) for (x, y) in results)
-
 
 
 def sigmoid(x):
