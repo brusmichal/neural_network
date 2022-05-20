@@ -1,6 +1,4 @@
 # Author: Jakub Mazurkiewicz
-from dataclasses import dataclass
-from typing import List, Tuple
 
 class MnistSetBase:
     """
