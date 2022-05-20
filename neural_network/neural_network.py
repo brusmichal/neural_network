@@ -40,8 +40,8 @@ class Network(object):
             for mini_batch in mini_batches:
                 self.update_mini_batch(mini_batch, learning_rate)
             if test_data:
-                print(f"Epoch: {i} / {epochs} Accuracy: {self.evaluate(test_data)} / {n_test}")
-                # print(f"Epoch: {i} / {epochs} MSE: {self.mean_loss(test_data)} / {n_test}")
+               print(f"Epoch: {i} / {epochs} Accuracy: {round(self.evaluate(test_data) * 100/ n_test, 2)} MSE: {self.MSE(test_data)}")
+                # print(f"Epoch: {i} / {epochs} MSE: {self.MSE(test_data)}")
             else:
                 print(f"Epoch {i} / {epochs} completed.")
 
@@ -68,7 +68,7 @@ class Network(object):
             z_vectors.append(z_vector)
             activation = self.act_function(z_vector)
             activations.append(activation)
-        delta = loss_derivative(activations[-1], y) * self.act_function_der(z_vectors[-1])
+        delta = loss_derivative(activations[-1], self.one_hot_encode(y)) * self.act_function_der(z_vectors[-1])
         nabla_b[-1] = delta
         nabla_w[-1] = np.dot(delta, np.transpose(activations[-2]))
 
@@ -84,6 +84,14 @@ class Network(object):
                    for (x, y) in test_data]
         return sum(int(x == y) for (x, y) in results)
 
+    def MSE(self, test_data):
+        err = [loss(self.feedforward(x), self.one_hot_encode(y)) for (x, y) in test_data]
+        mean_err = np.mean(err)
+        return mean_err
+    def one_hot_encode(self, j):
+        e = np.zeros((10, 1))
+        e[j] = 1.0
+        return e
 
 def sigmoid(x):
     return 1.0 / (1.0 + np.exp(-x))

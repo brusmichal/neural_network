@@ -10,7 +10,7 @@ def main():
     test_data = mnist.get_testing_set()
 
     network = Network([64, 15, 10])
-    network.SGD(training_data, 30, 10, 0.001, test_data=test_data)
+    network.SGD(training_data, 30, 10, 3, test_data=test_data)
 
 
 if __name__ == '__main__':
